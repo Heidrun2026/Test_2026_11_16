@@ -24,7 +24,7 @@ npm test
 npm run build:html
 ```
 
-Erzeugt `dist/kapazitaetsplanung.html` (eine Datei, die sich per Doppelklick im Browser öffnen lässt) und `dist/artifact.html` (dieselbe Seite ohne Dokumentgerüst, für die Veröffentlichung als claude.ai-Artifact). Der Ordner `dist/` wird nicht eingecheckt.
+Erzeugt `dist/kapazitaetsplanung.html` (eine Datei, die sich per Doppelklick im Browser öffnen lässt) und `dist/artifact.html` (dieselbe Seite ohne Dokumentgerüst, für die Veröffentlichung als claude.ai-Artifact). Eingecheckt wird nur `dist/kapazitaetsplanung.html`; nach Änderungen am Code bitte neu bauen.
 
 ## Abbildung des Prozesses
 

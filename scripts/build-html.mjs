@@ -20,6 +20,7 @@ const body = html.slice(html.indexOf('<body>') + 6, html.indexOf('</body>'))
 
 const head = `<title>Kapazitätsplanung Team</title>
 <meta name="theme-color" content="#00594f">
+<meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="${icon}">
 <style>
 ${css}

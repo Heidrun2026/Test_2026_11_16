@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#00594f">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.statistiken.bundesbank.de https://data-api.ecb.europa.eu https://ec.europa.eu https://api.gleif.org; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
   <title>ETF-Sparplan Auswahl</title>
@@ -40,12 +40,19 @@
 
     <div id="ergebnis" hidden>
       <div id="status" class="status-banner" role="status" aria-live="polite"></div>
+      <section aria-labelledby="h-markt">
+        <h2 id="h-markt">2. Marktumfeld aus offiziellen Quellen</h2>
+        <p class="hinweis">Lädt nur auf Klick: Rendite 10-jähriger Bundesanleihen (Bundesbank), Einlagezins und US-Dollar-Kurs (EZB), Inflation Deutschland (Eurostat) sowie die Fondsgesellschaft je ETF (GLEIF).
+          Übertragen werden nur Serienschlüssel und ISINs; die Dienste sehen technisch deine IP-Adresse.</p>
+        <p class="aktionen"><button type="button" class="btn btn-zweit" id="markt-laden">Aktuelle Daten laden</button></p>
+        <div id="markt" aria-live="polite"></div>
+      </section>
       <section aria-labelledby="h-auswertung">
-        <h2 id="h-auswertung">2. Auswertung</h2>
+        <h2 id="h-auswertung">3. Auswertung</h2>
         <div id="auswertung"></div>
       </section>
       <section aria-labelledby="h-etfs">
-        <h2 id="h-etfs">3. Die 10 ETFs und ihre Kennzahlen des letzten Jahres</h2>
+        <h2 id="h-etfs">4. Die 10 ETFs und ihre Kennzahlen des letzten Jahres</h2>
         <p class="hinweis-box">Trage die Werte aus einer kostenlosen Quelle ein (Links am jeweiligen ETF), am besten alle aus derselben Quelle und mit demselben Stichtag.
           <strong>Wertentwicklung 1 Jahr</strong> und <strong>Volatilität 1 Jahr</strong> findest du bei justETF und extraETF, <strong>TER</strong> und <strong>Risikoklasse (SRI)</strong> im Basisinformationsblatt des Anbieters.</p>
         <div id="etf-liste" class="etf-liste"></div>
@@ -58,7 +65,7 @@
       <ul>
         <li>Keine Anlageberatung. Die Bewertung vergleicht nur die eingetragenen Zahlen untereinander.</li>
         <li>Ein Jahr Wertentwicklung sagt wenig über zehn Jahre aus. Frühere Wertentwicklung ist kein verlässlicher Indikator für die Zukunft.</li>
-        <li>Die Sparplan-Rechnung zeigt Szenarien mit festen Jahresrenditen. Sie berücksichtigt keine Steuern, keine Ordergebühren und keine Inflation.</li>
+        <li>Die Sparplan-Rechnung zeigt Szenarien mit festen Jahresrenditen. Sie berücksichtigt keine Steuern und keine Ordergebühren; die Kaufkraft wird nur gezeigt, wenn die Inflation geladen wurde.</li>
         <li>Unabhängige, kostenlose Einordnung: Verbraucherzentrale, Finanztip.</li>
       </ul>
     </section>

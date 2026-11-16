@@ -55,8 +55,9 @@ function norm(x, min, max, hoeherBesser) {
  * Rendite 1 Jahr (hoch gut), Schwankung 1 Jahr (niedrig gut), Kosten TER (niedrig gut), Risikoklasse (niedrig gut).
  * @param {Array<{isin:string}>} etfs Stammdaten
  * @param {Record<string, object>} kennzahlen je ISIN
+ * @param {{risikofrei?: number}} optionen sicherer Zins in % p. a. (z. B. EZB-Einlagezins) für „Rendite je Risiko“
  */
-export function bewerte(etfs, kennzahlen) {
+export function bewerte(etfs, kennzahlen, { risikofrei = 0 } = {}) {
   const kandidaten = etfs
     .filter((e) => istVollstaendig(kennzahlen[e.isin]))
     .map((e) => {
@@ -78,7 +79,7 @@ export function bewerte(etfs, kennzahlen) {
       return {
         ...k,
         punkte: Math.round(punkte),
-        renditeJeRisiko: k.vola1J > 0 ? Math.round((k.rendite1J / k.vola1J) * 100) / 100 : null,
+        renditeJeRisiko: k.vola1J > 0 ? Math.round(((k.rendite1J - risikofrei) / k.vola1J) * 100) / 100 : null,
         passtZumProfil: k.sri <= MAX_SRI_PROFIL,
       };
     })
@@ -114,4 +115,9 @@ export function status(etfs, kennzahlen) {
   const passend = vollstaendig.filter((e) => zahl(kennzahlen[e.isin].sri) <= MAX_SRI_PROFIL);
   if (passend.length >= MIN_ANGEBOTE) return { stufe: 'erledigt', vollstaendig: vollstaendig.length, passend: passend.length };
   return { stufe: 'rueckfrage', vollstaendig: vollstaendig.length, passend: passend.length, fehlen: MIN_ANGEBOTE - passend.length };
+}
+
+/** Kaufkraft eines künftigen Betrags in heutigen Euro bei gleichbleibender Inflation (% p. a.). */
+export function realwert(betrag, inflationPa, jahre) {
+  return Math.round((betrag / Math.pow(1 + inflationPa / 100, jahre)) * 100) / 100;
 }

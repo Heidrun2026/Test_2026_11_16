@@ -1,6 +1,7 @@
 // Oberfläche der ETF-Auswahl. Alle Nutzertexte über esc().
 import { ETFS, quellen } from './etf-data.js';
-import { pruefeEingaben, fehlendeKennzahlen, bewerte, szenarien, status, MIN_ANGEBOTE, MAX_SRI_PROFIL, GEWICHTE, zahl } from './etf-calc.js';
+import { pruefeEingaben, fehlendeKennzahlen, bewerte, szenarien, sparplan, realwert, status, MIN_ANGEBOTE, MAX_SRI_PROFIL, GEWICHTE, zahl } from './etf-calc.js';
+import { ladeBund10, ladeEinlagezins, ladeDollar, ladeInflation, ladeGleif } from './marktdaten.js';
 
 const SPEICHER = 'etf-auswahl-v1';
 const FELDER = [
@@ -25,6 +26,7 @@ function speichern() {
 }
 let zustand = laden();
 zustand.kennzahlen ||= {};
+zustand.markt ||= {};
 
 function askConfirm(text) {
   const d = $('#bestaetigen');
@@ -37,6 +39,53 @@ function askConfirm(text) {
 
 function eingaben() {
   return { betrag: zahl($('#betrag').value), jahre: Number($('#jahre').value) };
+}
+
+function gleifZeile(isin) {
+  const g = zustand.markt.gleif?.[isin];
+  if (g === undefined) return '';
+  if (g === null) return '<p class="hinweis">GLEIF: keine LEI-Zuordnung zu dieser ISIN gefunden.</p>';
+  if (g.fehler) return `<p class="hinweis">GLEIF: ${esc(g.fehler)}</p>`;
+  return `<p class="hinweis">Rechtsträger laut GLEIF: <strong>${esc(g.name)}</strong> (LEI ${esc(g.lei)}, ${esc(g.land)}, ${esc(g.kategorie)}, Status ${esc(g.status)})</p>`;
+}
+
+const datum = (p) => (/^\d{4}-\d{2}-\d{2}$/.test(p) ? new Date(p + 'T00:00:00Z').toLocaleDateString('de-DE', { timeZone: 'UTC' }) : p);
+const markt = (key) => { const m = zustand.markt[key]; return m && !m.fehler ? m : null; };
+
+function marktAnzeigen() {
+  const m = zustand.markt;
+  if (!m.geladenAm) { $('#markt').innerHTML = ''; return; }
+  const zeile = (titel, key, text) => {
+    const d = m[key];
+    if (!d) return '';
+    if (d.fehler) return `<li><strong>${esc(titel)}:</strong> <span class="fehler">nicht geladen (${esc(d.fehler)})</span></li>`;
+    return `<li><strong>${esc(titel)}:</strong> ${text(d)} <span class="hinweis">– ${esc(d.quelle)}</span></li>`;
+  };
+  $('#markt').innerHTML = `<ul class="markt-liste">
+    ${zeile('Rendite 10-jährige Bundesanleihen', 'bund10', (d) => `${pz(d.wert)} p. a. (Stand ${esc(datum(d.periode))})`)}
+    ${zeile('EZB-Einlagezins', 'einlagezins', (d) => `${pz(d.wert)} p. a. (Stand ${esc(datum(d.periode))})`)}
+    ${zeile('Inflation Deutschland (HVPI, Vorjahr)', 'inflation', (d) => `${pz(d.wert, 1)} (${esc(d.periode)})`)}
+    ${zeile('US-Dollar gegenüber Euro', 'dollar', (d) => `${d.prozent > 0 ? '+' : ''}${pz(d.prozent, 1)} vom ${esc(datum(d.von))} bis ${esc(datum(d.bis))}${d.prozent < 0 ? ' – ein schwächerer Dollar mindert die Euro-Rendite von US-Aktien' : ''}`)}
+  </ul>
+  <p class="hinweis">Abgerufen am ${esc(new Date(m.geladenAm).toLocaleString('de-DE'))}.</p>`;
+}
+
+async function marktLaden() {
+  const knopf = $('#markt-laden');
+  knopf.disabled = true; knopf.textContent = 'Lädt …';
+  const fehler = (e) => ({ fehler: e?.message || 'unbekannter Fehler' });
+  const [bund10, einlagezins, inflation, dollar] = await Promise.allSettled([ladeBund10(), ladeEinlagezins(), ladeInflation(), ladeDollar()]);
+  const gleif = {};
+  for (const e of ETFS) { // nacheinander, um den Dienst zu schonen
+    try { gleif[e.isin] = await ladeGleif(e.isin); } catch (err) { gleif[e.isin] = fehler(err); }
+  }
+  const wert = (r) => (r.status === 'fulfilled' ? r.value : fehler(r.reason));
+  zustand.markt = { bund10: wert(bund10), einlagezins: wert(einlagezins), inflation: wert(inflation), dollar: wert(dollar), gleif, geladenAm: new Date().toISOString() };
+  speichern();
+  knopf.disabled = false; knopf.textContent = 'Aktuelle Daten neu laden';
+  marktAnzeigen();
+  $('#etf-liste').innerHTML = ETFS.map(etfKarte).join('');
+  auswertung();
 }
 
 function etfKarte(e) {
@@ -58,6 +107,7 @@ function etfKarte(e) {
     <p class="etf-meta">ISIN ${esc(e.isin)} · ${esc(e.klasse)} · ${esc(e.region)} · Index: ${esc(e.index)}</p>
     <p data-badge="${esc(e.isin)}">${badge}</p>
     <div class="kennzahlen">${felder}</div>
+    ${gleifZeile(e.isin)}
     <p class="quellen">Kostenlose Quellen: ${links}</p>
   </article>`;
 }
@@ -71,7 +121,10 @@ function auswertung() {
     ? `Erledigt: ${st.passend} ETFs mit vollständigen Kennzahlen passen zu deinem Risikoprofil (mindestens ${MIN_ANGEBOTE} nötig). Die Auswertung ist vollständig.`
     : `Rückfrage: Bisher ${st.passend} von mindestens ${MIN_ANGEBOTE} passenden ETFs mit vollständigen Kennzahlen. Bitte bei ${st.fehlen === 1 ? 'einem weiteren ETF' : `${st.fehlen} weiteren ETFs`} die Werte eintragen.`;
 
-  const liste = bewerte(ETFS, zustand.kennzahlen);
+  const rf = markt('einlagezins')?.wert;
+  const infl = markt('inflation')?.wert;
+  const bund = markt('bund10')?.wert;
+  const liste = bewerte(ETFS, zustand.kennzahlen, { risikofrei: rf ?? 0 });
   if (liste.length === 0) {
     $('#auswertung').innerHTML = '<p>Noch keine Auswertung. Trage unten für mindestens fünf ETFs die Kennzahlen des letzten Jahres ein.</p>';
     return;
@@ -88,20 +141,21 @@ function auswertung() {
       <td class="zahl">${e.renditeJeRisiko === null ? '–' : e.renditeJeRisiko.toLocaleString('de-DE')}</td>
       <td class="zahl">${pz(e.ter)}</td>
       <td class="zahl">${e.sri}</td>
-      <td class="zahl">${sz.map((s) => `<span class="hinweis">${s.renditePa} %:</span> ${eur(s.endwert)}`).join('<br>')}</td>
+      <td class="zahl">${sz.map((s) => `<span class="hinweis">${s.renditePa} %:</span> ${eur(s.endwert)}${infl !== undefined ? ` <span class="hinweis">(heute ${eur(realwert(s.endwert, infl, jahre))})</span>` : ''}`).join('<br>')}</td>
     </tr>`;
   }).join('');
   const eingezahlt = szenarien(betrag, jahre)[0].eingezahlt;
   $('#auswertung').innerHTML = `
     <p>Sparplan: <strong>${eur(betrag)}</strong> pro Monat über <strong>${jahre} Jahre</strong> = <strong>${eur(eingezahlt)}</strong> eingezahlt.</p>
+    ${bund !== undefined ? `<p>Vergleich sichere Anlage: Zur aktuellen Rendite 10-jähriger Bundesanleihen (${pz(bund)}) ergäbe der Sparplan etwa <strong>${eur(sparplan(betrag, jahre, bund).endwert)}</strong>. Ein ETF sollte diesen Wert auf Dauer deutlich übertreffen, um sein höheres Schwankungsrisiko auszugleichen.</p>` : ''}
     <div class="tabelle-scroll" tabindex="0" role="region" aria-label="Rangfolge der ETFs">
     <table class="rang">
       <caption class="sr-only">Rangfolge der ETFs nach Punkten</caption>
-      <thead><tr><th scope="col">Rang</th><th scope="col">ETF</th><th scope="col" class="zahl">Punkte (0–100)</th><th scope="col" class="zahl">Wert­entw. 1 J.</th><th scope="col" class="zahl">Volatilität</th><th scope="col" class="zahl">Rendite je Risiko</th><th scope="col" class="zahl">TER</th><th scope="col" class="zahl">SRI</th><th scope="col" class="zahl">Endwert nach ${jahre} J. je Szenario</th></tr></thead>
+      <thead><tr><th scope="col">Rang</th><th scope="col">ETF</th><th scope="col" class="zahl">Punkte (0–100)</th><th scope="col" class="zahl">Wert­entw. 1 J.</th><th scope="col" class="zahl">Volatilität</th><th scope="col" class="zahl">${rf !== undefined ? `Rendite je Risiko (über ${pz(rf)} Einlagezins)` : 'Rendite je Risiko'}</th><th scope="col" class="zahl">TER</th><th scope="col" class="zahl">SRI</th><th scope="col" class="zahl">Endwert nach ${jahre} J. je Szenario</th></tr></thead>
       <tbody>${zeilen}</tbody>
     </table></div>
     <p class="hinweis">So entstehen die Punkte (relativ zu den anderen eingetragenen ETFs): Wertentwicklung ${GEWICHTE.rendite}, niedrige Schwankung ${GEWICHTE.risiko}, niedrige Kosten ${GEWICHTE.kosten}, niedrige Risikoklasse ${GEWICHTE.risikoklasse}.
-      ETFs mit Risikoklasse über ${MAX_SRI_PROFIL} stehen am Ende. Endwerte: Szenario-Rendite abzüglich TER, vor Steuern – keine Prognose.</p>`;
+      ETFs mit Risikoklasse über ${MAX_SRI_PROFIL} stehen am Ende. Endwerte: Szenario-Rendite abzüglich TER, vor Steuern – keine Prognose.${infl !== undefined ? ` „Heute“ = Kaufkraft bei gleichbleibender Inflation von ${pz(infl, 1)} p. a.` : ''}</p>`;
 }
 
 function anzeigen() {
@@ -134,13 +188,15 @@ $('#etf-liste').addEventListener('change', (ev) => {
   auswertung();
 });
 
+$('#markt-laden').addEventListener('click', marktLaden);
+
 $('#loeschen').addEventListener('click', async () => {
   if (!(await askConfirm('Alle eingetragenen Kennzahlen löschen?'))) return;
-  zustand = { kennzahlen: {}, betrag: zustand.betrag, jahre: zustand.jahre };
+  zustand = { kennzahlen: {}, markt: zustand.markt, betrag: zustand.betrag, jahre: zustand.jahre };
   speichern();
   anzeigen();
 });
 
 if (zustand.betrag) $('#betrag').value = zustand.betrag;
 if (zustand.jahre) $('#jahre').value = zustand.jahre;
-if (Object.keys(zustand.kennzahlen).length) anzeigen();
+if (Object.keys(zustand.kennzahlen).length || zustand.markt.geladenAm) { anzeigen(); marktAnzeigen(); }

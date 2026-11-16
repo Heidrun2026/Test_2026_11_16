@@ -31,3 +31,4 @@ Status: Prototyp – nur fiktive Daten, nur lokal, nicht für den Betrieb.
 - Eigenständiger lokaler Prototyp, wird NICHT über GitHub Pages veröffentlicht. Details: `etf/README.md`.
 - Logik in `etf/js/etf-calc.js` (Tests: `tests/etf-calc.test.js`), Vorauswahl in `etf/js/etf-data.js`.
 - Keine Kurs-/Renditewerte im Code hinterlegen; keine anderen Anlageformen als ETFs (Nicht-Ziel).
+- Offene APIs (Bundesbank, EZB, Eurostat, GLEIF) in `etf/js/marktdaten.js`, nur auf Klick; neue Hosts auch in `connect-src` der CSP in `etf/index.html` eintragen. Parser-Tests: `tests/marktdaten.test.js`.

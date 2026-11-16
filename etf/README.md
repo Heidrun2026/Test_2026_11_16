@@ -15,8 +15,22 @@ Lokaler Prototyp, nur für die eigene Nutzung. Keine Anlageberatung.
 - Punkte 0–100, relativ zu den anderen eingetragenen ETFs: Wertentwicklung 40, niedrige Volatilität 35, niedrige Kosten 15, niedrige Risikoklasse 10.
 - Nicht-Ziel: Keine anderen Anlageformen als ETFs.
 
+## Offizielle Daten (offene APIs ohne Schlüssel)
+Werden nur auf Klick („Aktuelle Daten laden“) direkt aus dem Browser abgerufen (`etf/js/marktdaten.js`). Übertragen werden nur Serienschlüssel und ISINs; die Dienste sehen technisch die IP-Adresse.
+
+| Quelle | Verwendung in der App | Serie / Abfrage |
+|---|---|---|
+| Bundesbank | Vergleich „sichere Anlage“: Sparplan zur Rendite 10-jähriger Bundesanleihen | `BBSIS/D.I.ZAR.ZI.EUR.S1311.B.A604.R10XX.R.A.A._Z._Z.A` |
+| EZB | Einlagezins als sicherer Zins für „Rendite je Risiko“; EUR/USD-Veränderung über 1 Jahr (Währungseffekt) | `FM/D.U2.EUR.4F.KR.DFR.LEV`, `EXR/D.USD.EUR.SP00.A` |
+| Eurostat | Inflation Deutschland → Kaufkraft der Endwerte in heutigen Euro (Ersatz: EZB `ICP/M.DE.N.000000.4.ANR`) | `prc_hicp_manr`, geo=DE, coicop=CP00 |
+| GLEIF | Rechtsträger (Fonds) und LEI zur ISIN | `lei-records?filter[isin]=…` |
+
+**SEC EDGAR ist bewusst nicht angebunden:** Die ausgewählten ETFs sind europäische UCITS-Fonds (Irland/Luxemburg) und stehen nicht in EDGAR. Außerdem verlangt EDGAR einen User-Agent mit Kontaktangabe, den ein Browser nicht setzen kann; dafür wäre ein eigenes Backend nötig.
+
+Ungetestet gegen die Live-Dienste (in der Entwicklungsumgebung gesperrt). Liefert eine Quelle einen Fehler, zeigt die App ihn je Quelle an; dann Serienschlüssel im Datenportal prüfen. Falls der Browser eine Quelle wegen CORS blockiert, wäre ein kleiner lokaler Proxy nötig.
+
 ## Grenzen
-- Keine automatischen Kursabrufe. Externe Datendienste bräuchten eine Freigabe, und ihre Nutzungsbedingungen müssten geprüft werden.
+- Keine Kurs- und Renditeabrufe für die ETFs selbst: Die offiziellen offenen APIs liefern keine Fondskurse.
 - Stammdaten (Name, ISIN, Index) stammen aus dem Wissensstand und sind vor einer Anlage im Basisinformationsblatt zu prüfen.
 - Szenarien ohne Steuern, Ordergebühren und Inflation.
 

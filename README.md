@@ -26,6 +26,16 @@ npm run build:html
 
 Erzeugt `dist/kapazitaetsplanung.html` (eine Datei, die sich per Doppelklick im Browser öffnen lässt) und `dist/artifact.html` (dieselbe Seite ohne Dokumentgerüst, für die Veröffentlichung als claude.ai-Artifact). Eingecheckt wird nur `dist/kapazitaetsplanung.html`; nach Änderungen am Code bitte neu bauen.
 
+### Online (GitHub Pages)
+
+Nach jedem Push auf `main` veröffentlicht der Ablauf `.github/workflows/pages.yml` den Prototyp unter
+**https://heidrun2026.github.io/Test_2026_11_16/** (Einzeldatei: `…/kapazitaetsplanung.html`).
+
+- Einmalig einschalten: *Settings → Pages → Build and deployment → Source: GitHub Actions*.
+- Die Seite ist **öffentlich erreichbar**. Nur erfundene Daten eintragen. Gespeichert wird weiterhin nur im jeweiligen Browser.
+- Vor Änderungen am Code `npm test` und `npm run build:html` lokal ausführen und `dist/kapazitaetsplanung.html` mit einchecken.
+- Die Versionen der verwendeten Actions wurden nicht gegen OSV.dev geprüft (aus der Entwicklungsumgebung nicht erreichbar); bitte manuell prüfen.
+
 ## Abbildung des Prozesses
 
 | Prozessschritt (Canvas) | In der Anwendung |

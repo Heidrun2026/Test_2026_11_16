@@ -26,3 +26,8 @@ Status: Prototyp – nur fiktive Daten, nur lokal, nicht für den Betrieb.
 - Aufwände dürfen nie automatisch umverteilt werden (fachliches Nicht-Ziel).
 - Keine Leistungsauswertung einzelner Personen ergänzen (Mitbestimmung Betriebsrat).
 - Service Worker cacht nur die App-Hülle; bei Änderungen an der Hülle `CACHE` in `sw.js` hochzählen.
+
+## Teilprojekt `etf/` (ETF-Sparplan Auswahl)
+- Eigenständiger lokaler Prototyp, wird NICHT über GitHub Pages veröffentlicht. Details: `etf/README.md`.
+- Logik in `etf/js/etf-calc.js` (Tests: `tests/etf-calc.test.js`), Vorauswahl in `etf/js/etf-data.js`.
+- Keine Kurs-/Renditewerte im Code hinterlegen; keine anderen Anlageformen als ETFs (Nicht-Ziel).

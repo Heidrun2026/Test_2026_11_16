@@ -1,0 +1,25 @@
+/* Ergänzungen zur gemeinsamen styles.css (Design-Tokens dort). */
+.etf-main { max-width: 80rem; margin: 0 auto; padding: 0 1rem 3rem; }
+.eingabe-zeile { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0 1rem; }
+.etf-liste { display: grid; gap: 0.75rem; }
+.etf-karte { background: var(--flaeche); border-radius: var(--radius); padding: 0.75rem 1rem; border-left: 4px solid var(--linie); }
+.etf-karte.ok { border-left-color: var(--ok-text); }
+.etf-karte.hoch { border-left-color: var(--ul-text); }
+.etf-karte h3 { margin: 0 0 0.2rem; font-size: 1.05rem; }
+.etf-meta { margin: 0 0 0.5rem; color: var(--text-leise); font-size: 0.9rem; }
+.kennzahlen { align-items: end; display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0 0.75rem; }
+.kennzahlen input { width: 100%; }
+.quellen { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.95rem; }
+.quellen a { min-height: 44px; display: inline-flex; align-items: center; }
+.badge { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; background: var(--hg); border: 1px solid var(--linie); }
+.badge-ok { background: var(--ok-hg); color: var(--ok-text); border-color: transparent; }
+.badge-hoch { background: var(--ul-hg); color: var(--ul-text); border-color: transparent; }
+.badge-offen { background: var(--pr-hg); color: var(--pr-text); border-color: transparent; }
+.rang { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.rang th, .rang td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--linie); vertical-align: top; }
+.rang td.zahl, .rang th.zahl { text-align: right; white-space: nowrap; }
+.balken { display: block; width: 6rem; margin-left: auto; margin-top: 0.25rem; }
+.fehler { color: var(--ul-text); font-weight: 600; }
+.wichtig { margin-top: 2rem; }
+.status-erledigt { background: var(--ok-hg); color: var(--ok-text); }
+.rang td:nth-child(2) { min-width: 14rem; }

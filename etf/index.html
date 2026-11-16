@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#00594f">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ETF-Sparplan Auswahl</title>
+  <link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="./etf.css">
+</head>
+<body>
+  <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+  <div class="prototyp-hinweis" role="note">Prototyp – keine Anlageberatung. Eingaben bleiben nur in diesem Browser.</div>
+  <header class="kopf"><div class="kopf-zeile"><span class="app-name">ETF-Sparplan Auswahl</span></div></header>
+  <main id="inhalt" class="etf-main">
+    <h1>ETF für einen monatlichen Sparplan auswählen</h1>
+
+    <section aria-labelledby="h-eingaben">
+      <h2 id="h-eingaben">1. Sparplan</h2>
+      <form id="eingaben" novalidate>
+        <div class="eingabe-zeile">
+          <div class="feld">
+            <label for="betrag">Monatlicher Betrag in EUR <span aria-hidden="true">*</span></label>
+            <input id="betrag" name="betrag" type="number" inputmode="decimal" min="1" step="0.01" required value="100">
+          </div>
+          <div class="feld">
+            <label for="jahre">Zeitraum in Jahren <span aria-hidden="true">*</span></label>
+            <input id="jahre" name="jahre" type="number" inputmode="numeric" min="1" max="50" step="1" required value="10">
+          </div>
+        </div>
+        <p class="hinweis">* Pflichtangaben. Risikoprofil: mittel bis niedrig (Risikoklasse 1–4 von 7).</p>
+        <div id="eingabe-fehler" role="alert"></div>
+        <p class="aktionen"><button type="submit" class="btn">10 ETFs anzeigen</button></p>
+      </form>
+    </section>
+
+    <div id="ergebnis" hidden>
+      <div id="status" class="status-banner" role="status" aria-live="polite"></div>
+      <section aria-labelledby="h-auswertung">
+        <h2 id="h-auswertung">2. Auswertung</h2>
+        <div id="auswertung"></div>
+      </section>
+      <section aria-labelledby="h-etfs">
+        <h2 id="h-etfs">3. Die 10 ETFs und ihre Kennzahlen des letzten Jahres</h2>
+        <p class="hinweis-box">Trage die Werte aus einer kostenlosen Quelle ein (Links am jeweiligen ETF), am besten alle aus derselben Quelle und mit demselben Stichtag.
+          <strong>Wertentwicklung 1 Jahr</strong> und <strong>Volatilität 1 Jahr</strong> findest du bei justETF und extraETF, <strong>TER</strong> und <strong>Risikoklasse (SRI)</strong> im Basisinformationsblatt des Anbieters.</p>
+        <div id="etf-liste" class="etf-liste"></div>
+        <p class="aktionen"><button type="button" class="btn btn-zweit" id="loeschen">Alle Eingaben löschen</button></p>
+      </section>
+    </div>
+
+    <section aria-labelledby="h-wichtig" class="wichtig">
+      <h2 id="h-wichtig">Wichtig</h2>
+      <ul>
+        <li>Keine Anlageberatung. Die Bewertung vergleicht nur die eingetragenen Zahlen untereinander.</li>
+        <li>Ein Jahr Wertentwicklung sagt wenig über zehn Jahre aus. Frühere Wertentwicklung ist kein verlässlicher Indikator für die Zukunft.</li>
+        <li>Die Sparplan-Rechnung zeigt Szenarien mit festen Jahresrenditen. Sie berücksichtigt keine Steuern, keine Ordergebühren und keine Inflation.</li>
+        <li>Unabhängige, kostenlose Einordnung: Verbraucherzentrale, Finanztip.</li>
+      </ul>
+    </section>
+  </main>
+  <dialog id="bestaetigen" aria-labelledby="b-titel">
+    <form method="dialog" class="dialog-inhalt">
+      <h2 id="b-titel">Bitte bestätigen</h2>
+      <p class="b-text"></p>
+      <p class="aktionen"><button type="submit" class="btn" value="ok">Bestätigen</button>
+      <button type="submit" class="btn btn-zweit" value="abbrechen">Abbrechen</button></p>
+    </form>
+  </dialog>
+  <noscript>Für diese Anwendung wird JavaScript benötigt.</noscript>
+  <script type="module" src="./js/etf-app.js"></script>
+</body>
+</html>

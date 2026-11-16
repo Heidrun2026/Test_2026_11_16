@@ -7,6 +7,7 @@ Status: Prototyp – nur fiktive Daten, nur lokal, nicht für den Betrieb.
 ## Befehle
 - Starten (lokal): `python3 -m http.server 8080 --bind 127.0.0.1`
 - Tests: `npm test` (node:test, keine Abhängigkeiten)
+- Einzelne HTML-Datei bauen: `npm run build:html` → `dist/` (Artifact: `dist/artifact.html`)
 
 ## Architektur
 - Statisches Frontend, Vanilla JavaScript (ES-Module), keine Fremdpakete, kein Build.
@@ -21,6 +22,7 @@ Status: Prototyp – nur fiktive Daten, nur lokal, nicht für den Betrieb.
 - Keine externen CDNs/Schriften; CSP in `index.html` erlaubt nur `'self'`.
 
 ## Stolperfallen
+- Keine `confirm()`/`alert()` verwenden (in eingebetteten Ansichten gesperrt); stattdessen `askConfirm()`.
 - Aufwände dürfen nie automatisch umverteilt werden (fachliches Nicht-Ziel).
 - Keine Leistungsauswertung einzelner Personen ergänzen (Mitbestimmung Betriebsrat).
 - Service Worker cacht nur die App-Hülle; bei Änderungen an der Hülle `CACHE` in `sw.js` hochzählen.

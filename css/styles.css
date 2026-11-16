@@ -18,7 +18,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --primaer: #4fb8a8;
     --primaer-text: #06201c;
     --text: #e8ecee;
@@ -30,8 +30,24 @@
     --pr-hg: #3f3205;   --pr-text: #ffe08a;
     --ul-hg: #4a1714;   --ul-text: #ffc4bf;
     --fokus: #8cc4ff;
+    color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+    --primaer: #4fb8a8;
+    --primaer-text: #06201c;
+    --text: #e8ecee;
+    --text-leise: #b3bec4;
+    --hg: #15191b;
+    --flaeche: #1f2528;
+    --linie: #3a4449;
+    --ok-hg: #163b25;   --ok-text: #b8eacb;
+    --pr-hg: #3f3205;   --pr-text: #ffe08a;
+    --ul-hg: #4a1714;   --ul-text: #ffc4bf;
+    --fokus: #8cc4ff;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -45,7 +61,7 @@ h2 { font-size: 1.25rem; margin-top: 2rem; }
 h3 { font-size: 1.05rem; margin-top: 1.5rem; }
 h1:focus { outline: none; }
 :focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
-main { padding: var(--abstand); max-width: 80rem; margin-inline: auto; }
+main { padding-block: var(--abstand); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 80rem; margin-inline: auto; }
 .lead { color: var(--text-leise); max-width: 60rem; }
 .hinweis { color: var(--text-leise); font-size: 0.9rem; }
 .hilfe { display: block; color: var(--text-leise); font-size: 0.85rem; }
@@ -160,3 +176,4 @@ dialog { border: 0; border-radius: 10px; padding: 0; width: min(40rem, calc(100v
 dialog::backdrop { background: rgb(0 0 0 / 0.45); }
 .dialog-inhalt { padding: 1rem 1.25rem; }
 .dialog-inhalt h2 { margin-top: 0; }
+#export-text { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; }

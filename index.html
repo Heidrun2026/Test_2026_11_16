@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#00594f">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
-  <title>Kapazitätsplanung (Prototyp)</title>
+  <title>Kapazitätsplanung Team</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./css/styles.css">
@@ -35,6 +35,14 @@
   <main id="inhalt"></main>
   <div id="status-meldung" class="sr-live" role="status" aria-live="polite"></div>
   <dialog id="detail" aria-labelledby="detail-titel"><div class="dialog-inhalt"></div></dialog>
+  <dialog id="bestaetigen" aria-labelledby="b-titel">
+    <form method="dialog" class="dialog-inhalt">
+      <h2 id="b-titel">Bitte bestätigen</h2>
+      <p class="b-text"></p>
+      <p class="aktionen"><button type="submit" class="btn" value="ok">Bestätigen</button>
+      <button type="submit" class="btn btn-zweit" value="abbrechen">Abbrechen</button></p>
+    </form>
+  </dialog>
   <noscript>Für diese Anwendung wird JavaScript benötigt.</noscript>
   <script type="module" src="./js/app.js"></script>
 </body>

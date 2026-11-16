@@ -7,6 +7,7 @@ import {
 } from './calc.js';
 import { load, save, reset, seedState, newId, validateImport } from './store.js';
 
+document.documentElement.lang = 'de'; // falls die Seite ohne eigenes <html lang> eingebettet wird
 const LEAD = 'teamleitung';
 const today = new Date();
 const MONTHS = planningMonths(new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)), 7);
@@ -440,7 +441,6 @@ function render() {
   });
   const main = document.getElementById('inhalt');
   main.innerHTML = VIEWS[ui.view][1]();
-  document.title = `${VIEWS[ui.view][0]} – Kapazitätsplanung (Prototyp)`;
 }
 
 function switchView(view) {
@@ -453,6 +453,32 @@ function switchView(view) {
 function openDetail(memberId, k) {
   const dlg = document.getElementById('detail');
   dlg.querySelector('.dialog-inhalt').innerHTML = detailHtml(memberId, k);
+  dlg.showModal();
+}
+
+/** Bestätigung als Dialog in der Seite (Browser-Rückfragen sind in eingebetteten Ansichten gesperrt). */
+function askConfirm(text, okLabel = 'Bestätigen') {
+  const dlg = document.getElementById('bestaetigen');
+  dlg.querySelector('.b-text').textContent = text;
+  dlg.querySelector('[value=ok]').textContent = okLabel;
+  dlg.returnValue = '';
+  dlg.showModal();
+  return new Promise((resolve) => {
+    dlg.addEventListener('close', () => resolve(dlg.returnValue === 'ok'), { once: true });
+  });
+}
+
+function showExport() {
+  const json = JSON.stringify(state, null, 2);
+  const dlg = document.getElementById('detail');
+  dlg.querySelector('.dialog-inhalt').innerHTML = `
+    <h2 id="detail-titel">Daten sichern</h2>
+    <p>Kopieren Sie den Inhalt und speichern Sie ihn als Textdatei (z. B. <code>kapazitaet.json</code>). Über „Sicherung laden“ können Sie ihn später wieder einlesen.</p>
+    <label for="export-text">Sicherung (JSON)</label>
+    <textarea id="export-text" rows="10" readonly>${esc(json)}</textarea>
+    <p class="aktionen"><button type="button" class="btn" data-action="export-copy">In die Zwischenablage kopieren</button>
+    <button type="button" class="btn btn-zweit" data-action="export-download">Als Datei herunterladen</button>
+    <button type="button" class="btn btn-zweit" data-action="close-detail">Schließen</button></p>`;
   dlg.showModal();
 }
 
@@ -485,9 +511,12 @@ function onClick(e) {
     case 'booking-del': {
       const b = state.buchungen.find((x) => x.id === t.dataset.id);
       if (!b || !canEditBooking(b)) return;
-      if (!confirm(`Eintrag „${projekt(b.projektId)?.name ?? ''}“ (${b.tage} PT für ${nameOf(b.memberId)}) löschen?`)) return;
-      state.buchungen = state.buchungen.filter((x) => x.id !== b.id);
-      return commit('Eintrag gelöscht.');
+      askConfirm(`Eintrag „${projekt(b.projektId)?.name ?? ''}“ (${b.tage} PT für ${nameOf(b.memberId)}) löschen?`, 'Löschen').then((ok) => {
+        if (!ok) return;
+        state.buchungen = state.buchungen.filter((x) => x.id !== b.id);
+        commit('Eintrag gelöscht.');
+      });
+      return undefined;
     }
     case 'copy-prev': {
       const prev = shiftMonth(ui.monat, -1);
@@ -515,18 +544,32 @@ function onClick(e) {
     case 'mitglied-del': {
       const m = member(t.dataset.id);
       const n = state.buchungen.filter((b) => b.memberId === m.id).length;
-      if (!confirm(`${m.name} entfernen? ${n} geplante Einträge für diese Person werden ebenfalls gelöscht.`)) return;
-      state.mitglieder = state.mitglieder.filter((x) => x.id !== m.id);
-      state.buchungen = state.buchungen.filter((b) => b.memberId !== m.id);
-      delete state.grunddaten[m.id];
-      return commit('Teammitglied entfernt.');
+      askConfirm(`${m.name} entfernen? ${n} geplante Einträge für diese Person werden ebenfalls gelöscht.`, 'Entfernen').then((ok) => {
+        if (!ok) return;
+        state.mitglieder = state.mitglieder.filter((x) => x.id !== m.id);
+        state.buchungen = state.buchungen.filter((b) => b.memberId !== m.id);
+        delete state.grunddaten[m.id];
+        commit('Teammitglied entfernt.');
+      });
+      return undefined;
     }
-    case 'export':
+    case 'export': return showExport();
+    case 'export-copy': {
+      const ta = document.getElementById('export-text');
+      const fallback = () => { ta.focus(); ta.select(); announce('Kopieren nicht möglich. Der Text ist markiert, bitte mit Strg+C kopieren.'); };
+      if (!navigator.clipboard) return fallback();
+      navigator.clipboard.writeText(ta.value).then(() => announce('In die Zwischenablage kopiert.'), fallback);
+      return undefined;
+    }
+    case 'export-download':
       return download(`kapazitaetsplanung-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(state, null, 2));
     case 'reset':
-      if (!confirm('Alle Daten im Browser durch die Beispieldaten ersetzen?')) return;
-      state = reset();
-      return commit('Beispieldaten geladen.');
+      askConfirm('Alle Daten in diesem Browser durch die Beispieldaten ersetzen?', 'Zurücksetzen').then((ok) => {
+        if (!ok) return;
+        state = reset();
+        commit('Beispieldaten geladen.');
+      });
+      return undefined;
     default:
   }
 }
@@ -590,9 +633,11 @@ function onChange(e) {
         try { obj = JSON.parse(txt); } catch { return announce('Die Datei ist kein gültiges JSON.'); }
         const err = validateImport(obj);
         if (err) return announce(err);
-        if (!confirm('Aktuelle Daten durch die Sicherung ersetzen?')) return;
-        state = { ...seedState(), ...obj, meldungen: obj.meldungen ?? {}, grunddaten: obj.grunddaten ?? {} };
-        commit('Sicherung geladen.');
+        return askConfirm('Aktuelle Daten durch die Sicherung ersetzen?', 'Ersetzen').then((ok) => {
+          if (!ok) return;
+          state = { ...seedState(), ...obj, meldungen: obj.meldungen ?? {}, grunddaten: obj.grunddaten ?? {} };
+          commit('Sicherung geladen.');
+        });
       });
       return undefined;
     }

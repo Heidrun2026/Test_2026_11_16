@@ -1,5 +1,5 @@
 // Service Worker: cacht NUR die App-Hülle. Keine Planungsdaten.
-const CACHE = 'kapa-shell-v1'; // Bei Änderungen der Hülle hochzählen
+const CACHE = 'kapa-shell-v2'; // Bei Änderungen der Hülle hochzählen
 const SHELL = ['./', './index.html', './offline.html', './css/styles.css', './js/app.js', './js/calc.js', './js/store.js', './manifest.webmanifest', './icons/icon.svg'];
 const OFFLINE = new URL('./offline.html', self.registration.scope).href;
 

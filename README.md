@@ -18,6 +18,14 @@ Dann im Browser `http://127.0.0.1:8080/` öffnen. Tests der Rechenlogik (Node.js
 npm test
 ```
 
+### Als einzelne HTML-Datei
+
+```bash
+npm run build:html
+```
+
+Erzeugt `dist/kapazitaetsplanung.html` (eine Datei, die sich per Doppelklick im Browser öffnen lässt) und `dist/artifact.html` (dieselbe Seite ohne Dokumentgerüst, für die Veröffentlichung als claude.ai-Artifact). Der Ordner `dist/` wird nicht eingecheckt.
+
 ## Abbildung des Prozesses
 
 | Prozessschritt (Canvas) | In der Anwendung |
